@@ -1,0 +1,76 @@
+---
+# tasks file for elasticsearch
+- name: create directory path to store the persistent information 
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0747
+  tags:
+    - elasticsearch
+  with_items:
+    - "{{ elasticsearch_dir }}"
+    - "{{ elasticsearch_conf_path }}"
+    - "{{ elasticsearch_data_path }}"
+
+- name: "Set entry in sysctl.conf: vm.max_map_count=262144"
+  sysctl:
+    name: vm.max_map_count
+    value: 262144
+    state: present
+
+- name: "Create elasticsearch container env file"
+  template:
+    src=elasticsearch-env.j2 dest={{elasticsearch_conf_path}}/.esenv
+  tags:
+    - elasticsearch
+
+
+- name: run elasticsearch container
+  docker_container:
+    name: elasticsearch
+    image: "{{ elasticsearch_image }}"
+    detach: true
+    state: started
+    network_mode: "host"
+    ulimits:
+    - memlock:-1:-1
+    volumes:
+    - "{{ elasticsearch_data_path }}:/usr/share/elasticsearch/data"
+    restart_policy: always
+    env_file: "{{elasticsearch_conf_path}}/.esenv"
+  tags:
+    - elasticsearch
+
+
+- name: wait for elastic service to come up"
+  wait_for:
+     host: "127.0.0.1"
+     port: "9200"
+     delay: 20
+     timeout: 600
+     connect_timeout: 10
+  tags:
+    - elasticsearch
+
+- name: change default password for superuser elastic
+  uri:
+     url: "http://localhost:9200/_xpack/security/user/elastic/_password"
+     user: "elastic"
+     password: "changeme"
+     validate_certs: "no"
+     method: PUT
+     HEADER_Content-Type: "application/json"
+     body: '{ "password" : "{{elasticsearch_password}}" }'
+     body_format: json
+  register: result
+  until: result.status == 200
+  retries: 1
+  delay: 20
+  changed_when: false
+  tags:
+    - elasticsearch
+   
+
+- name: debug
+  debug: var=result
+

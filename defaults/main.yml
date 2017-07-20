@@ -1,0 +1,10 @@
+---
+# defaults file for elasticsearch
+#elasticsearch_image: docker.elastic.co/elasticsearch/elasticsearch:5.4.3
+elasticsearch_image: docker.elastic.co/elasticsearch/elasticsearch:5.5.0
+elasticsearch_dir: /opt/elasticsearch
+elasticsearch_data_path: "{{elasticsearch_dir}}/data"
+elasticsearch_conf_path: "{{elasticsearch_dir}}/conf"
+
+elasticsearch_cluster_name: 'escluster'
+elasticsearch_password: 's3cret'
