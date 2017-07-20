@@ -74,3 +74,5 @@
 - name: debug
   debug: var=result
 
+- include: grafana.yml
+  when: 'install_grafana == true'

@@ -8,3 +8,9 @@ elasticsearch_conf_path: "{{elasticsearch_dir}}/conf"
 
 elasticsearch_cluster_name: 'escluster'
 elasticsearch_password: 's3cret'
+
+install_grafana: true
+
+grafana_image: grafana/grafana
+grafana_data_path: /var/lib/grafana
+grafana_admin_password: 's3cret'
