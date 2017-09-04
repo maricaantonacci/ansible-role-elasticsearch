@@ -62,6 +62,7 @@
      HEADER_Content-Type: "application/json"
      body: '{ "password" : "{{elasticsearch_password}}" }'
      body_format: json
+     status_code: [ 200, 401 ]
   register: result
   until: result.status == 200 or result.status == 401
   retries: 1
