@@ -1,0 +1,51 @@
+---
+# tasks file for elasticsearch
+
+- name: run grafana container
+  docker_container:
+    name: grafana
+    image: "{{ grafana_image }}"
+    detach: true
+    state: started
+    network_mode: "host"
+    volumes:
+    - "{{ grafana_data_path }}:/var/lib/grafana"
+    restart_policy: always
+    env: 
+      GF_SECURITY_ADMIN_PASSWORD: "{{ grafana_admin_password }}"
+  tags:
+    - grafana
+
+
+- name: wait for grafana service to come up"
+  wait_for:
+     host: "127.0.0.1"
+     port: "3000"
+     delay: 20
+     timeout: 600
+     connect_timeout: 10
+  tags:
+    - grafana
+
+#- name: change default password for superuser elastic
+#  uri:
+#     url: "http://localhost:9200/_xpack/security/user/elastic/_password"
+#     user: "elastic"
+#     password: "changeme"
+#     validate_certs: "no"
+#     method: PUT
+#     HEADER_Content-Type: "application/json"
+#     body: '{ "password" : "{{elasticsearch_password}}" }'
+#     body_format: json
+#  register: result
+#  until: result.status == 200
+#  retries: 1
+#  delay: 20
+#  changed_when: false
+#  tags:
+#    - elasticsearch
+#   
+#
+#- name: debug
+#  debug: var=result
+
